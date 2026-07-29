@@ -97,8 +97,8 @@ func newRelayHTTPTransport() *http.Transport {
 	if common.TLSInsecureSkipVerify {
 		transport.TLSClientConfig = common.InsecureTLSConfig
 	}
-	// Use utls to mimic Chrome TLS fingerprint (bypasses Go 1.25+ JA3 blocking e.g. MiniMax)
-	transport.DialTLS = func(network, addr string) (net.Conn, error) {
+	// Use utls to mimic Firefox TLS fingerprint (bypasses Go 1.25+ JA3 blocking e.g. MiniMax)
+	transport.DialTLSContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		host, _, err := net.SplitHostPort(addr)
 		if err != nil {
 			host = addr
