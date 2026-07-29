@@ -107,7 +107,7 @@ func newRelayHTTPTransport() *http.Transport {
 		if err != nil {
 			return nil, err
 		}
-		utlsConn := utls.UClient(rawConn, &utls.Config{ServerName: host}, utls.HelloChrome_Auto)
+		utlsConn := utls.UClient(rawConn, &utls.Config{ServerName: host}, utls.HelloFirefox_Auto)
 		if err := utlsConn.Handshake(); err != nil {
 			return nil, err
 		}
