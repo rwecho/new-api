@@ -16,6 +16,8 @@ import (
 	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/setting/system_setting"
 
+	utls "github.com/refraction-networking/utls"
+
 	"golang.org/x/net/proxy"
 )
 
@@ -95,6 +97,24 @@ func newRelayHTTPTransport() *http.Transport {
 	if common.TLSInsecureSkipVerify {
 		transport.TLSClientConfig = common.InsecureTLSConfig
 	}
+	// Use utls to mimic Chrome TLS fingerprint (bypasses Go 1.25+ JA3 blocking e.g. MiniMax)
+	transport.DialTLS = func(network, addr string) (net.Conn, error) {
+		host, _, err := net.SplitHostPort(addr)
+		if err != nil {
+			host = addr
+		}
+		rawConn, err := net.DialTimeout(network, addr, 30*time.Second)
+		if err != nil {
+			return nil, err
+		}
+		utlsConn := utls.UClient(rawConn, &utls.Config{ServerName: host}, utls.HelloChrome_Auto)
+		if err := utlsConn.Handshake(); err != nil {
+			return nil, err
+		}
+		return utlsConn, nil
+	}
+	transport.ForceAttemptHTTP2 = false
+	transport.TLSNextProto = make(map[string]func(string, *tls.Conn) http.RoundTripper)
 	return transport
 }
 
