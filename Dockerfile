@@ -24,6 +24,7 @@ ADD relaykit/go.mod ./relaykit/go.mod
 RUN go mod download
 
 COPY . .
+RUN go mod tidy
 COPY --from=builder /build/web/dist ./web/dist
 RUN go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat VERSION)'" -o new-api
 
